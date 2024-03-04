@@ -1,1 +1,201 @@
-<h1>Hello world !</h1>
+<!doctype html>
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <title>Çà passe, où ça casse</title>
+
+    <meta name="description" content="Çà passe, où ça casse">
+    <meta name="author" content="Stéphane FEREY">
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <!-- Reveal.js -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/dist/theme/moon.css" id="theme">
+
+    <!-- Native plugins of reveal.js -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/markdown/markdown.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/math/math.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/highlight/highlight.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.0/plugin/highlight/zenburn.css">
+
+    <!-- Font awesome is used by several plugins -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Style file -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/style.css">
+
+    <!-- QR-Codes -->
+    <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+
+	<!-- Load content plugin -->
+	<script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/loadcontent/plugin.js"></script>
+
+    <!-- Fullscreen plugin -->
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js-plugins@latest/fullscreen/plugin.js"></script>
+
+    <!-- Customized style -->
+    <style>
+        [data-fullscreen]::after {
+            content: "";
+            display: block;
+            height: 50px;
+            /* Adjust the value as needed */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>Çà passe, où ça casse</h1>
+                <p>par Stéphane FEREY</p>
+                <div id="qrcode"></div>
+                <p><a id="url"></a></p>
+            </section>
+            <section data-markdown data-separator="^\n===\n$" data-separator-vertical="^\n---\n$"></section>
+            <section>
+                <h2>Fin</h2>
+                <div class="presentation-only">
+                    <p>Vous avez atteint la dernière diapositive de ce diaporama. <br> Cliquez s'il vous plait</p>
+                    <ul>
+                        <li><a href="#" onclick="return nextTopic();"><i class="fas fa-external-link-alt"></i></a> pour continuer avec le prochain diaporama.</li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // list of topics
+        // the src must be found within the folder, folders must be distinct!
+        var topics = [
+            { topic: "Overview", src: "slides.md", folder: "overview" },
+        ];
+
+        var topicId = getTopicId();
+        document.title = "Çà passe, où ça casse: " + getTopic();
+
+        // load topic
+        document.querySelector('section[data-markdown=""]').setAttribute("data-markdown", topics[topicId].folder + "/" + topics[topicId].src);
+
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            width: 1280,
+            height: 1050,
+            controls: true,
+            navigationMode: 'linear',
+            progress: true,
+            history: false,
+            center: true,
+            mouseWheel: true,
+            previewLinks: false,
+            slideNumber: true,
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+            animate: {
+                autoplay: true
+            },
+            plugins: [
+                RevealMarkdown,
+                RevealMath,
+                RevealHighlight,
+                RevealFullscreen,
+            ]
+        });
+
+
+        /******************************************
+        * Create QR-Code
+        ******************************************/
+        function initQRCode() {
+            var QRCodeElement = document.getElementById('qrcode');
+            if (QRCodeElement) {
+                const qrCode = new QRCodeStyling({
+                    type: "svg",
+                    width: 400,
+                    height: 400,
+                    data: getURL(topicId),
+                    backgroundOptions: {
+                        color: "white",
+                    },
+                    imageOptions: {
+                        crossOrigin: "anonymous",
+                        margin: 10
+                    },
+                });
+                qrCode.append(QRCodeElement);
+            }
+
+            var urlElement = document.getElementById('url');
+            if (urlElement) {
+                urlElement.innerHTML = getURL(topicId);
+                urlElement.href = getURL(topicId);
+            }
+
+        }
+
+        initQRCode();
+
+        /******************************************
+        * Setup of topics
+        ******************************************/
+
+        function getTopicId() {
+            // get topic id
+            var urlparts = window.location.href.split('?');
+            if (urlparts.length >= 2) {
+                var prefix = encodeURIComponent("topic") + '=';
+                var parts = urlparts[1].split(/[&;]/g);
+                for (var i = parts.length; i-- > 0;) {
+                    if (parts[i].lastIndexOf(prefix, 0) !== -1) {
+                        var j = parts[i].lastIndexOf(prefix, 0);
+                        var identifier = parts[i].substr(prefix.length, parts[i].length - prefix.length);
+
+                        var id = topics.findIndex(element => element.folder == identifier);
+                        if (id < 0) {
+                            id = Number(identifier);
+                        }
+                        return Math.min(id, topics.length - 1);
+                    }
+                }
+            }
+            return 0;
+        }
+
+        function nextTopic() {
+            if (topicId >= topics.length - 1) {
+                alert("Vous avez déjà atteint le dernier diaporama!");
+            }
+            else {
+                window.location.href = getURL(topicId + 1);
+            }
+            return false;
+        }
+
+        function getURL(id) {
+            var urlparts = window.location.href.split('?');
+            if (id === undefined) {
+                return urlparts[0];
+            }
+            return urlparts[0] + '?' + "topic=" + topics[id].folder;
+        }
+
+        function getPath() {
+            return topics[topicId].folder;
+        }
+
+        function getTopic() {
+            return topics[topicId].topic;
+        }
+    </script>
+</body>
+
+</html>
